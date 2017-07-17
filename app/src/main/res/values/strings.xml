@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">ToDoList</string>
+    <string name="date">06-04-2017</string>
+    <string name="description">To do description</string>
+    <string-array name="toggle_categories">
+        <item>Completed</item>
+        <item>In Progress</item>
+        <item>Shopping</item>
+        <item>School</item>
+        <item>Business</item>
+        <item>Personal</item>
+    </string-array>
+    <string-array name="initial_categories">
+        <item>Shopping</item>
+        <item>School</item>
+        <item>Business</item>
+        <item>Personal</item>
+    </string-array>
 </resources>

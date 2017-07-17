@@ -7,12 +7,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.example.patrick.todolist.data.Contract;
 import com.example.patrick.todolist.data.ToDoItem;
 
 import java.util.ArrayList;
+
+import static android.R.attr.category;
 
 /**
  * Created by mark on 7/4/17.
@@ -46,7 +49,7 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
     }
 
     public interface ItemClickListener {
-        void onItemClick(int pos, String description, String duedate, long id);
+        void onItemClick(int pos, String description, String duedate,Integer completion,String category, long id);
     }
 
     public ToDoListAdapter(Cursor cursor, ItemClickListener listener) {
@@ -64,10 +67,13 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
     }
 
     class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView descr;
-        TextView due;
-        String duedate;
-        String description;
+        private TextView descr;
+        private TextView due;
+        private CheckBox checkBox;
+        private String duedate;
+        private String description;
+        private String category;
+        private Integer itemCompleted=0;
         long id;
 
 
@@ -75,8 +81,11 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
             super(view);
             descr = (TextView) view.findViewById(R.id.description);
             due = (TextView) view.findViewById(R.id.dueDate);
+            checkBox=(CheckBox) view.findViewById(R.id.checkbox);
+
             view.setOnClickListener(this);
         }
+
 
         public void bind(ItemHolder holder, int pos) {
             cursor.moveToPosition(pos);
@@ -85,6 +94,15 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
 
             duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
             description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
+            itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
+            category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+
+            if(itemCompleted==1){
+                checkBox.setChecked(true);
+            }else{
+                checkBox.setChecked(false);
+            }
+
             descr.setText(description);
             due.setText(duedate);
             holder.itemView.setTag(id);
@@ -93,7 +111,14 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();
-            listener.onItemClick(pos, description, duedate, id);
+            listener.onItemClick(pos, description, duedate,itemCompleted,category, id);
+        }
+
+        public void completionCheck(View v){
+            CheckBox checkBox=(CheckBox)v;
+            if(checkBox.isChecked()){
+                itemCompleted=1;
+            }
         }
     }
 

@@ -24,7 +24,9 @@ public class DBHelper extends SQLiteOpenHelper{
         String queryString = "CREATE TABLE " + Contract.TABLE_TODO.TABLE_NAME + " ("+
                 Contract.TABLE_TODO._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION + " TEXT NOT NULL, " +
-                Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE + " DATE " + "); ";
+                Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE + " DATE, " +
+                Contract.TABLE_TODO.COLUMN_NAME_COMPLETION + " INTEGER NOT NULL, "+
+                Contract.TABLE_TODO.COLUMN_NAME_CATEGORY + " TEXT NOT NULL " +"); ";
 
         Log.d(TAG, "Create table SQL: " + queryString);
         db.execSQL(queryString);
@@ -32,6 +34,6 @@ public class DBHelper extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        db.execSQL("drop table " + Contract.TABLE_TODO.TABLE_NAME + " if exists;");
+        db.execSQL("drop table " + Contract.TABLE_TODO.TABLE_NAME + " if exists;");
     }
 }
