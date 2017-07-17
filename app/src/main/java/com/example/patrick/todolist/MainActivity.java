@@ -13,6 +13,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
                 frag.show(fm, "addtodofragment");
             }
         });
+
         rv = (RecyclerView) findViewById(R.id.recyclerView);
         rv.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -58,11 +61,15 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     protected void onStart() {
         super.onStart();
 
+        createAdapter("Default");
+    }
+
+    private void createAdapter(String category){
         helper = new DBHelper(this);
         db = helper.getWritableDatabase();
         cursor = getAllItems(db);
 
-        adapter = new ToDoListAdapter(cursor, new ToDoListAdapter.ItemClickListener() {
+        adapter = new ToDoListAdapter(cursor, category,new ToDoListAdapter.ItemClickListener() {
 
             @Override
             public void onItemClick(int pos, String description, String duedate, Integer completion,String category,long id) {
@@ -97,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
             }
         }).attachToRecyclerView(rv);
     }
-
     @Override
     public void closeDialog(int year, int month, int day, String description,Integer completion,String category) {
         addToDo(db, description, formatDate(year, month, day),completion,category);
@@ -155,5 +161,37 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     public void closeUpdateDialog(int year, int month, int day, String description, Integer completion,String category,long id) {
         updateToDo(db, year, month, day, description,completion,category, id);
         adapter.swapCursor(getAllItems(db));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.categories,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemThatWasClickedId=item.getItemId();
+        if(itemThatWasClickedId==R.id.default_category){
+            createAdapter("Default");
+            return true;
+        }
+        if(itemThatWasClickedId==R.id.shopping_category){
+            createAdapter("Shopping");
+            return true;
+        }
+        if(itemThatWasClickedId==R.id.business_category){
+            createAdapter("Business");
+            return true;
+        }
+        if(itemThatWasClickedId==R.id.school_category){
+            createAdapter("School");
+            return true;
+        }
+        if(itemThatWasClickedId==R.id.personal_category){
+            createAdapter("Personal");
+            return true;
+        }
+        return onOptionsItemSelected(item);
     }
 }

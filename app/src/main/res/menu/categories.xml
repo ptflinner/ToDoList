@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<item
+    android:title="Default"
+    android:id="@+id/default_category"
+    android:orderInCategory="1"
+    app:showAsAction="collapseActionView"
+    />
+    <item
+        android:title="Shopping"
+        android:id="@+id/shopping_category"
+        android:orderInCategory="2"
+        app:showAsAction="collapseActionView"
+        />
+    <item
+        android:title="School"
+        android:id="@+id/school_category"
+        android:orderInCategory="3"
+        app:showAsAction="collapseActionView"
+        />
+    <item
+        android:title="Business"
+        android:id="@+id/business_category"
+        android:orderInCategory="4"
+        app:showAsAction="collapseActionView"
+        />
+    <item
+        android:title="Personal"
+        android:id="@+id/personal_category"
+        android:orderInCategory="5"
+        app:showAsAction="collapseActionView"
+        />
+</menu>

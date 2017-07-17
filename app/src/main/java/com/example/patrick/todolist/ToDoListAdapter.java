@@ -25,6 +25,7 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
 
     private Cursor cursor;
     private ItemClickListener listener;
+    private String category;
     private String TAG = "todolistadapter";
 
     @Override
@@ -34,7 +35,7 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View view = inflater.inflate(R.layout.item, parent, false);
-        ItemHolder holder = new ItemHolder(view);
+        ItemHolder holder = new ItemHolder(view,category);
         return holder;
     }
 
@@ -52,9 +53,10 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         void onItemClick(int pos, String description, String duedate,Integer completion,String category, long id);
     }
 
-    public ToDoListAdapter(Cursor cursor, ItemClickListener listener) {
+    public ToDoListAdapter(Cursor cursor, String category,ItemClickListener listener) {
         this.cursor = cursor;
         this.listener = listener;
+        this.category=category;
     }
 
     public void swapCursor(Cursor newCursor){
@@ -77,12 +79,12 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         long id;
 
 
-        ItemHolder(View view) {
+        ItemHolder(View view,String category) {
             super(view);
             descr = (TextView) view.findViewById(R.id.description);
             due = (TextView) view.findViewById(R.id.dueDate);
             checkBox=(CheckBox) view.findViewById(R.id.checkbox);
-
+            this.category=category;
             view.setOnClickListener(this);
         }
 
@@ -91,21 +93,46 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
             cursor.moveToPosition(pos);
             id = cursor.getLong(cursor.getColumnIndex(Contract.TABLE_TODO._ID));
             Log.d(TAG, "deleting id: " + id);
+            Log.d(TAG,"Category: "+category);
 
-            duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
-            description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
-            itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
-            category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
 
-            if(itemCompleted==1){
-                checkBox.setChecked(true);
-            }else{
-                checkBox.setChecked(false);
+            if(category=="Default"){
+                category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+                duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
+                description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
+                itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
+
+                if(itemCompleted==1){
+                    checkBox.setChecked(true);
+                }else{
+                    checkBox.setChecked(false);
+                }
+
+                descr.setText(description);
+                due.setText(duedate);
+                holder.itemView.setTag(id);
             }
+            else{
+                String dbCategory=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));;
+                if(category==dbCategory){
+                    duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
+                    description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
+                    itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
 
-            descr.setText(description);
-            due.setText(duedate);
-            holder.itemView.setTag(id);
+                    if(itemCompleted==1){
+                        checkBox.setChecked(true);
+                    }else{
+                        checkBox.setChecked(false);
+                    }
+
+                    descr.setText(description);
+                    due.setText(duedate);
+                    holder.itemView.setTag(id);
+                }
+                else{
+                    Log.e(TAG,"Failed to find correct category");
+                }
+            }
         }
 
         @Override
