@@ -73,7 +73,14 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     private void createAdapter(String category){
         helper = new DBHelper(this);
         db = helper.getWritableDatabase();
-        cursor = getAllItems(db);
+
+        if(selectedCategory.toUpperCase().equals("DEFAULT")){
+            cursor = getAllItems(db);
+        }
+        else{
+            cursor =getCategoryItems(db);
+        }
+
 
         adapter = new ToDoListAdapter(cursor, category,new ToDoListAdapter.ItemClickListener() {
 
@@ -124,6 +131,23 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
 
 
 
+    private Cursor getCategoryItems(SQLiteDatabase db){
+        String args[]=new String[]{Contract.TABLE_TODO._ID,
+                Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION,
+                Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE,
+                Contract.TABLE_TODO.COLUMN_NAME_CATEGORY,
+                Contract.TABLE_TODO.COLUMN_NAME_COMPLETION};
+
+        return db.query(
+                Contract.TABLE_TODO.TABLE_NAME,
+                args,
+                Contract.TABLE_TODO.COLUMN_NAME_CATEGORY+"=?",
+                new String[]{selectedCategory},
+                null,
+                null,
+                Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE
+        );
+    }
     private Cursor getAllItems(SQLiteDatabase db) {
         return db.query(
                 Contract.TABLE_TODO.TABLE_NAME,
