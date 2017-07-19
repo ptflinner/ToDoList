@@ -59,7 +59,7 @@ public class AddToDoFragment extends DialogFragment{
             @Override
             public void onClick(View v) {
                 OnDialogCloseListener activity = (OnDialogCloseListener) getActivity();
-                activity.closeDialog(dp.getYear(), dp.getMonth(), dp.getDayOfMonth(), toDo.getText().toString(),0,"");
+                activity.closeDialog(dp.getYear(), dp.getMonth(), dp.getDayOfMonth(), toDo.getText().toString(),0,catSpin.getSelectedItem().toString());
                 AddToDoFragment.this.dismiss();
             }
         });

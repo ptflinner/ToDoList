@@ -35,7 +35,10 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View view = inflater.inflate(R.layout.item, parent, false);
+
         ItemHolder holder = new ItemHolder(view,category);
+
+        Log.d(TAG,"CREATION ENDS?");
         return holder;
     }
 
@@ -76,6 +79,7 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         private String description;
         private String category;
         private Integer itemCompleted=0;
+
         long id;
 
 
@@ -86,55 +90,46 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
             checkBox=(CheckBox) view.findViewById(R.id.checkbox);
             this.category=category;
             view.setOnClickListener(this);
+            Log.d(TAG,"CREATION: ");
         }
 
 
         public void bind(ItemHolder holder, int pos) {
+
             cursor.moveToPosition(pos);
+
             id = cursor.getLong(cursor.getColumnIndex(Contract.TABLE_TODO._ID));
             Log.d(TAG, "deleting id: " + id);
             Log.d(TAG,"Category: "+category);
 
-
-            if(category=="Default"){
-                category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
-                duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
-                description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
-                itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
-
-                if(itemCompleted==1){
-                    checkBox.setChecked(true);
-                }else{
-                    checkBox.setChecked(false);
-                }
-
-                descr.setText(description);
-                due.setText(duedate);
-                holder.itemView.setTag(id);
+            String dbCategory=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+            if(category=="Default"||category.toUpperCase().equals(dbCategory.toUpperCase())) {
+                bindItems(holder);
             }
             else{
-                String dbCategory=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));;
-                if(category==dbCategory){
-                    duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
-                    description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
-                    itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
-
-                    if(itemCompleted==1){
-                        checkBox.setChecked(true);
-                    }else{
-                        checkBox.setChecked(false);
-                    }
-
-                    descr.setText(description);
-                    due.setText(duedate);
-                    holder.itemView.setTag(id);
-                }
-                else{
-                    Log.e(TAG,"Failed to find correct category");
-                }
+//                bind(holder,pos+1);
+                Log.e(TAG,"Failed to find correct category");
             }
+
         }
 
+        private void bindItems(ItemHolder holder){
+            duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
+            description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
+            itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
+            category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+
+            if(itemCompleted==1){
+                checkBox.setChecked(true);
+            }else{
+                checkBox.setChecked(false);
+            }
+
+            descr.setText(description);
+            due.setText(duedate);
+            holder.itemView.setTag(id);
+
+        }
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();

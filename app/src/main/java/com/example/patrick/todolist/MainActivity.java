@@ -20,6 +20,9 @@ import android.view.View;
 
 import com.example.patrick.todolist.data.Contract;
 import com.example.patrick.todolist.data.DBHelper;
+import com.example.patrick.todolist.data.ToDoItem;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements AddToDoFragment.OnDialogCloseListener, UpdateToDoFragment.OnUpdateDialogCloseListener{
 
@@ -29,7 +32,10 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     private Cursor cursor;
     private SQLiteDatabase db;
     ToDoListAdapter adapter;
+    private String selectedCategory="Default";
     private final String TAG = "mainactivity";
+//    private ArrayList<ToDoItem> toDoList;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     protected void onStart() {
         super.onStart();
 
-        createAdapter("Default");
+        createAdapter(selectedCategory);
     }
 
     private void createAdapter(String category){
@@ -109,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         addToDo(db, description, formatDate(year, month, day),completion,category);
         cursor = getAllItems(db);
         adapter.swapCursor(cursor);
+        createAdapter(selectedCategory);
     }
 
     public String formatDate(int year, int month, int day) {
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
 
     private int updateToDo(SQLiteDatabase db, int year, int month, int day, String description,Integer completion,String category, long id){
 
-        String duedate = formatDate(year, month - 1, day);
+        String duedate = formatDate(year, month, day);
 
         ContentValues cv = new ContentValues();
         cv.put(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION, description);
@@ -161,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     public void closeUpdateDialog(int year, int month, int day, String description, Integer completion,String category,long id) {
         updateToDo(db, year, month, day, description,completion,category, id);
         adapter.swapCursor(getAllItems(db));
+        createAdapter(selectedCategory);
     }
 
     @Override
@@ -173,25 +181,39 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId=item.getItemId();
         if(itemThatWasClickedId==R.id.default_category){
-            createAdapter("Default");
+            selectedCategory="Default";
+            createAdapter(selectedCategory);
             return true;
         }
         if(itemThatWasClickedId==R.id.shopping_category){
-            createAdapter("Shopping");
+            selectedCategory="Shopping";
+            createAdapter(selectedCategory);
             return true;
         }
         if(itemThatWasClickedId==R.id.business_category){
-            createAdapter("Business");
+            selectedCategory="Business";
+            createAdapter(selectedCategory);
             return true;
         }
         if(itemThatWasClickedId==R.id.school_category){
-            createAdapter("School");
+            selectedCategory="School";
+            createAdapter(selectedCategory);
             return true;
         }
         if(itemThatWasClickedId==R.id.personal_category){
-            createAdapter("Personal");
+            selectedCategory="Personal";
+            createAdapter(selectedCategory);
             return true;
         }
         return onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void createList(){
+
     }
 }
