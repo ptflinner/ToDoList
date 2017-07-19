@@ -5,16 +5,26 @@ package com.example.patrick.todolist.data;
  */
 
 public class ToDoItem {
+    private long id;
     private String description;
     private String dueDate;
-    private boolean completed;
+    private Integer completed;
     private String category;
 
-    public ToDoItem(String description, String dueDate,boolean completed,String category) {
+    public ToDoItem(long id,String description, String dueDate,int completed,String category) {
+        this.id=id;
         this.description = description;
         this.dueDate = dueDate;
         this.completed=completed;
         this.category=category;
+    }
+
+    public ToDoItem(ToDoItem copy){
+        this.id=copy.getId();
+        this.description=copy.getDescription();
+        this.dueDate=copy.getDueDate();
+        this.completed=copy.getCompleted();
+        this.category=copy.getCategory();
     }
 
     public String getDescription() {
@@ -33,11 +43,11 @@ public class ToDoItem {
         this.dueDate = dueDate;
     }
 
-    public boolean isCompleted() {
+    public Integer getCompleted() {
         return completed;
     }
 
-    public void setCompleted(boolean completed) {
+    public void setCompleted(Integer completed) {
         this.completed = completed;
     }
 
@@ -47,5 +57,13 @@ public class ToDoItem {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

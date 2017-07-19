@@ -23,9 +23,8 @@ import static android.R.attr.category;
 
 public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHolder> {
 
-    private Cursor cursor;
     private ItemClickListener listener;
-    private String category;
+    private ArrayList<ToDoItem> toDoList;
     private String TAG = "todolistadapter";
 
     @Override
@@ -36,7 +35,7 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
 
         View view = inflater.inflate(R.layout.item, parent, false);
 
-        ItemHolder holder = new ItemHolder(view,category);
+        ItemHolder holder = new ItemHolder(view);
 
         Log.d(TAG,"CREATION ENDS?");
         return holder;
@@ -49,26 +48,17 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
 
     @Override
     public int getItemCount() {
-        return cursor.getCount();
+        return toDoList.size();
     }
 
     public interface ItemClickListener {
         void onItemClick(int pos, String description, String duedate,Integer completion,String category, long id);
     }
 
-    public ToDoListAdapter(Cursor cursor, String category,ItemClickListener listener) {
-        this.cursor = cursor;
-        this.listener = listener;
-        this.category=category;
-    }
+    public ToDoListAdapter(ArrayList<ToDoItem> toDoList,ItemClickListener listener) {
 
-    public void swapCursor(Cursor newCursor){
-        if (cursor != null) cursor.close();
-        cursor = newCursor;
-        if (newCursor != null) {
-            // Force the RecyclerView to refresh
-            this.notifyDataSetChanged();
-        }
+        this.listener = listener;
+        this.toDoList=toDoList;
     }
 
     class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -78,17 +68,16 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
         private String duedate;
         private String description;
         private String category;
-        private Integer itemCompleted=0;
+        private Integer itemCompleted;
 
         long id;
 
 
-        ItemHolder(View view,String category) {
+        ItemHolder(View view) {
             super(view);
             descr = (TextView) view.findViewById(R.id.description);
             due = (TextView) view.findViewById(R.id.dueDate);
             checkBox=(CheckBox) view.findViewById(R.id.checkbox);
-            this.category=category;
             view.setOnClickListener(this);
             Log.d(TAG,"CREATION: ");
         }
@@ -96,28 +85,13 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
 
         public void bind(ItemHolder holder, int pos) {
 
-            cursor.moveToPosition(pos);
-
-            id = cursor.getLong(cursor.getColumnIndex(Contract.TABLE_TODO._ID));
-            Log.d(TAG, "deleting id: " + id);
             Log.d(TAG,"Category: "+category);
 
-            String dbCategory=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
-            if(category=="Default"||category.toUpperCase().equals(dbCategory.toUpperCase())) {
-                bindItems(holder);
-            }
-            else{
-//                bind(holder,pos+1);
-                Log.e(TAG,"Failed to find correct category");
-            }
-
-        }
-
-        private void bindItems(ItemHolder holder){
-            duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
-            description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
-            itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
-            category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+            duedate = toDoList.get(pos).getDueDate();
+            description = toDoList.get(pos).getDescription();
+            itemCompleted=toDoList.get(pos).getCompleted();
+            category=toDoList.get(pos).getCategory();
+            id=toDoList.get(pos).getId();
 
             if(itemCompleted==1){
                 checkBox.setChecked(true);

@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     ToDoListAdapter adapter;
     private String selectedCategory="Default";
     private final String TAG = "mainactivity";
-//    private ArrayList<ToDoItem> toDoList;
+    private ArrayList<ToDoItem> toDoList;
 
 
     @Override
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "oncreate called in main activity");
+        toDoList=new ArrayList<>();
         button = (FloatingActionButton) findViewById(R.id.addToDo);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,16 +67,49 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     @Override
     protected void onStart() {
         super.onStart();
-
-        createAdapter(selectedCategory);
+        createAdapter();
     }
 
-    private void createAdapter(String category){
+    private void loadDatabase(){
+        String duedate;
+        String description;
+        String category;
+        Integer itemCompleted=0;
+        long id;
+
+        toDoList=new ArrayList<>();
         helper = new DBHelper(this);
         db = helper.getWritableDatabase();
         cursor = getAllItems(db);
 
-        adapter = new ToDoListAdapter(cursor, category,new ToDoListAdapter.ItemClickListener() {
+        while(cursor.moveToNext()){
+            id=cursor.getLong(cursor.getColumnIndex("_id"));
+            duedate = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE));
+            description = cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION));
+            itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
+            category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
+
+            toDoList.add(new ToDoItem(id,description,duedate,itemCompleted,category));
+        }
+
+
+    }
+
+    private void createAdapter(){
+        loadDatabase();
+        ArrayList<ToDoItem> newToDoList=new ArrayList<>();
+        if(!(selectedCategory.equals("Default"))){
+            for(int i=0;i<toDoList.size();i++){
+                if(toDoList.get(i).getCategory().equals(selectedCategory)){
+                    newToDoList.add(new ToDoItem(toDoList.get(i)));
+                }
+            }
+        }
+        else{
+            newToDoList=toDoList;
+        }
+
+        adapter = new ToDoListAdapter(newToDoList,new ToDoListAdapter.ItemClickListener() {
 
             @Override
             public void onItemClick(int pos, String description, String duedate, Integer completion,String category,long id) {
@@ -106,16 +140,28 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
                 long id = (long) viewHolder.itemView.getTag();
                 Log.d(TAG, "passing id: " + id);
                 removeToDo(db, id);
-                adapter.swapCursor(getAllItems(db));
+                int location=searchForId(id);
+                toDoList.remove(location);
+                createAdapter();
             }
         }).attachToRecyclerView(rv);
+    }
+
+    private int searchForId(long id){
+        for(int i=0;i<toDoList.size();i++){
+            if(toDoList.get(i).getId()==id){
+                return i;
+            }
+        }
+        return -1;
     }
     @Override
     public void closeDialog(int year, int month, int day, String description,Integer completion,String category) {
         addToDo(db, description, formatDate(year, month, day),completion,category);
-        cursor = getAllItems(db);
-        adapter.swapCursor(cursor);
-        createAdapter(selectedCategory);
+        cursor.moveToLast();
+        long id=cursor.getLong(cursor.getColumnIndex("_id"));
+        toDoList.add(new ToDoItem(id,description,formatDate(year,month,day),completion,category));
+        createAdapter();
     }
 
     public String formatDate(int year, int month, int day) {
@@ -154,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     private int updateToDo(SQLiteDatabase db, int year, int month, int day, String description,Integer completion,String category, long id){
 
         String duedate = formatDate(year, month, day);
-
+        Log.d(TAG,"UPDATE ID: "+id);
         ContentValues cv = new ContentValues();
         cv.put(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION, description);
         cv.put(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE, duedate);
@@ -166,9 +212,15 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
 
     @Override
     public void closeUpdateDialog(int year, int month, int day, String description, Integer completion,String category,long id) {
+
         updateToDo(db, year, month, day, description,completion,category, id);
-        adapter.swapCursor(getAllItems(db));
-        createAdapter(selectedCategory);
+        Log.d(TAG,"UPDATE ID: "+id);
+        int location=searchForId(id);
+        toDoList.get(location).setCategory(category);
+        toDoList.get(location).setCompleted(completion);
+        toDoList.get(location).setDueDate(formatDate(year,month,day));
+        toDoList.get(location).setDescription(description);
+        createAdapter();
     }
 
     @Override
@@ -182,27 +234,27 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         int itemThatWasClickedId=item.getItemId();
         if(itemThatWasClickedId==R.id.default_category){
             selectedCategory="Default";
-            createAdapter(selectedCategory);
+            createAdapter();
             return true;
         }
         if(itemThatWasClickedId==R.id.shopping_category){
             selectedCategory="Shopping";
-            createAdapter(selectedCategory);
+            createAdapter();
             return true;
         }
         if(itemThatWasClickedId==R.id.business_category){
             selectedCategory="Business";
-            createAdapter(selectedCategory);
+            createAdapter();
             return true;
         }
         if(itemThatWasClickedId==R.id.school_category){
             selectedCategory="School";
-            createAdapter(selectedCategory);
+            createAdapter();
             return true;
         }
         if(itemThatWasClickedId==R.id.personal_category){
             selectedCategory="Personal";
-            createAdapter(selectedCategory);
+            createAdapter();
             return true;
         }
         return onOptionsItemSelected(item);
@@ -211,9 +263,5 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    public void createList(){
-
     }
 }
