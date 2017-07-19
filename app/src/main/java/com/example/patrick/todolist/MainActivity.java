@@ -34,9 +34,8 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
     ToDoListAdapter adapter;
     private String selectedCategory="Default";
     private final String TAG = "mainactivity";
-//    private ArrayList<ToDoItem> toDoList;
 
-
+    //Creates the activity and initializes the variables and sets up the recycler view
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         rv.setLayoutManager(new LinearLayoutManager(this));
     }
 
+    //When the app stops it closes connections to the db and to the cursor
     @Override
     protected void onStop() {
         super.onStop();
@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         if (cursor != null) cursor.close();
     }
 
+    //When the app starts its lifecycle it creates the adapter
     @Override
     protected void onStart() {
         super.onStart();
@@ -70,10 +71,15 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         createAdapter(selectedCategory);
     }
 
-    private void createAdapter(String category){
+    //The adapter is created and begins making and placing everything
+    private void createAdapter(final String category){
+        //Database is set up
         helper = new DBHelper(this);
         db = helper.getWritableDatabase();
 
+        //Checks what categories need to be displayed
+        //Default isn't an option to be placed in the database
+        //So it must be checked for explicitly
         if(selectedCategory.toUpperCase().equals("DEFAULT")){
             cursor = getAllItems(db);
         }
@@ -81,9 +87,11 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
             cursor =getCategoryItems(db);
         }
 
+        //Adapter is made using the cursor that was set above.
+        adapter = new ToDoListAdapter(cursor,new ToDoListAdapter.ItemClickListener() {
 
-        adapter = new ToDoListAdapter(cursor, category,new ToDoListAdapter.ItemClickListener() {
-
+            //Interface in the todolist adapter is implemented here
+            //on item click will trigger everything in the selected object to be passed to the update fragment
             @Override
             public void onItemClick(int pos, String description, String duedate, Integer completion,String category,long id) {
                 Log.d(TAG, "item click id: " + id);
@@ -97,10 +105,18 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
                 UpdateToDoFragment frag = UpdateToDoFragment.newInstance(year, month, day, description,completion,category, id);
                 frag.show(fm, "updatetodofragment");
             }
+
+            //WIP. Supposed to update the database when checkbox is clicked
+            @Override
+            public void checkBoxUsed(String description, String dueDate, Integer completion, String category, long id) {
+                updateToDo(dueDate,description,completion,category,id);
+            }
+
         });
 
         rv.setAdapter(adapter);
 
+        //Allows for items to be deleted by swiping
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
@@ -117,20 +133,22 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
             }
         }).attachToRecyclerView(rv);
     }
+
+    //Closes the dialog for adding a dataset and then updates the UI elements
     @Override
     public void closeDialog(int year, int month, int day, String description,Integer completion,String category) {
         addToDo(db, description, formatDate(year, month, day),completion,category);
         cursor = getAllItems(db);
         adapter.swapCursor(cursor);
-        createAdapter(selectedCategory);
+//        createAdapter(selectedCategory);
     }
 
+    //formats the date to the proper style
     public String formatDate(int year, int month, int day) {
         return String.format("%04d-%02d-%02d", year, month + 1, day);
     }
 
-
-
+    //Used to filter what categories are displayed
     private Cursor getCategoryItems(SQLiteDatabase db){
         String args[]=new String[]{Contract.TABLE_TODO._ID,
                 Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION,
@@ -148,6 +166,8 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
                 Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE
         );
     }
+
+    //Gets all items in the database
     private Cursor getAllItems(SQLiteDatabase db) {
         return db.query(
                 Contract.TABLE_TODO.TABLE_NAME,
@@ -160,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         );
     }
 
+    //Adds an item to the database
     private long addToDo(SQLiteDatabase db, String description, String duedate,Integer completion,String category) {
         ContentValues cv = new ContentValues();
         cv.put(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION, description);
@@ -169,12 +190,13 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         return db.insert(Contract.TABLE_TODO.TABLE_NAME, null, cv);
     }
 
+    //Removes an item from the database
     private boolean removeToDo(SQLiteDatabase db, long id) {
         Log.d(TAG, "deleting id: " + id);
         return db.delete(Contract.TABLE_TODO.TABLE_NAME, Contract.TABLE_TODO._ID + "=" + id, null) > 0;
     }
 
-
+    //Updates an item in the database
     private int updateToDo(SQLiteDatabase db, int year, int month, int day, String description,Integer completion,String category, long id){
 
         String duedate = formatDate(year, month, day);
@@ -188,19 +210,42 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         return db.update(Contract.TABLE_TODO.TABLE_NAME, cv, Contract.TABLE_TODO._ID + "=" + id, null);
     }
 
+    //WIP
+    //Another way to update the Database
+    private int updateToDo(String dueDate, String description,Integer completion,String category, long id){
+
+        ContentValues cv = new ContentValues();
+        cv.put(Contract.TABLE_TODO.COLUMN_NAME_DESCRIPTION, description);
+        cv.put(Contract.TABLE_TODO.COLUMN_NAME_DUE_DATE, dueDate);
+        cv.put(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION,completion);
+        cv.put(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY,category);
+
+        return db.update(Contract.TABLE_TODO.TABLE_NAME, cv, Contract.TABLE_TODO._ID + "=" + id, null);
+    }
+
+    //Closes the update dialog and sends the data to be updated
+    //Then updates the UI
     @Override
     public void closeUpdateDialog(int year, int month, int day, String description, Integer completion,String category,long id) {
         updateToDo(db, year, month, day, description,completion,category, id);
-        adapter.swapCursor(getAllItems(db));
-        createAdapter(selectedCategory);
+        if(selectedCategory.toUpperCase().equals("DEFAULT")){
+            cursor = getAllItems(db);
+        }
+        else{
+            cursor = getCategoryItems(db);
+        }
+        adapter.swapCursor(cursor);
+//        createAdapter(selectedCategory);
     }
 
+    //Creates the menu in the top right
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.categories,menu);
         return true;
     }
 
+    //Sets up what happens when an item is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId=item.getItemId();
@@ -232,12 +277,17 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
         return onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    public void createList(){
-
+    //WIP
+    //Not working currently
+    public void updateDatabase(String dueDate, String description,Integer completion,String category,long id){
+        updateToDo(dueDate, description,completion,category, id);
+        if(selectedCategory.toUpperCase().equals("DEFAULT")){
+            cursor = getAllItems(db);
+        }
+        else{
+            cursor = getCategoryItems(db);
+        }
+        adapter.swapCursor(cursor);
+        createAdapter(selectedCategory);
     }
 }

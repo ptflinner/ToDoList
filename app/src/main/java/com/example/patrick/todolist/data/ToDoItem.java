@@ -4,6 +4,7 @@ package com.example.patrick.todolist.data;
  * Created by mark on 7/4/17.
  */
 
+//Data model class. never used
 public class ToDoItem {
     private String description;
     private String dueDate;

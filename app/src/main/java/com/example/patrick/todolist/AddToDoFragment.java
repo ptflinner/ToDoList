@@ -34,6 +34,7 @@ public class AddToDoFragment extends DialogFragment{
         void closeDialog(int year, int month, int day, String description,Integer completion,String category);
     }
 
+    //Creates the AddToDoFragment. Initializes the various parts.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_to_do_adder, container, false);
@@ -42,10 +43,11 @@ public class AddToDoFragment extends DialogFragment{
         dp = (DatePicker) view.findViewById(R.id.datePicker);
         add = (Button) view.findViewById(R.id.add);
 
-
+        //Used for the spinner. Creates the spinner from an array in the values.xml file
         ArrayAdapter<CharSequence> adapter=ArrayAdapter.createFromResource(getActivity(),
                 R.array.initial_categories,android.R.layout.simple_spinner_item);
 
+        //Gets the info that was placed into the various parts
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         catSpin.setAdapter(adapter);
         final Calendar c = Calendar.getInstance();
@@ -55,6 +57,7 @@ public class AddToDoFragment extends DialogFragment{
         dp.updateDate(year, month, day);
 
 
+        //When the submit button is pressed the information goes to the mainactivity to be dealt with
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

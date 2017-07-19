@@ -19,6 +19,7 @@ public class DBHelper extends SQLiteOpenHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    //Creates the database
     @Override
     public void onCreate(SQLiteDatabase db) {
         String queryString = "CREATE TABLE " + Contract.TABLE_TODO.TABLE_NAME + " ("+
@@ -32,6 +33,7 @@ public class DBHelper extends SQLiteOpenHelper{
         db.execSQL(queryString);
     }
 
+    //When the database has been changed it will drop it and recreate it
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop table " + Contract.TABLE_TODO.TABLE_NAME + " if exists;");

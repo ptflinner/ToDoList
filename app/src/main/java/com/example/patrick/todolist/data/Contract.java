@@ -8,6 +8,7 @@ import android.provider.BaseColumns;
 
 public class Contract {
 
+    //Constants so the database scheme is easy to use
     public static class TABLE_TODO implements BaseColumns{
         public static final String TABLE_NAME = "todoitems";
 
