@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
                 frag.show(fm, "updatetodofragment");
             }
 
-            //WIP. Supposed to update the database when checkbox is clicked
+            //Update the database when checkbox is used
             @Override
             public void checkBoxUsed(String description, String dueDate, Integer completion, String category, long id) {
                 updateToDo(dueDate,description,completion,category,id);
@@ -275,19 +275,5 @@ public class MainActivity extends AppCompatActivity implements AddToDoFragment.O
             return true;
         }
         return onOptionsItemSelected(item);
-    }
-
-    //WIP
-    //Not working currently
-    public void updateDatabase(String dueDate, String description,Integer completion,String category,long id){
-        updateToDo(dueDate, description,completion,category, id);
-        if(selectedCategory.toUpperCase().equals("DEFAULT")){
-            cursor = getAllItems(db);
-        }
-        else{
-            cursor = getCategoryItems(db);
-        }
-        adapter.swapCursor(cursor);
-        createAdapter(selectedCategory);
     }
 }

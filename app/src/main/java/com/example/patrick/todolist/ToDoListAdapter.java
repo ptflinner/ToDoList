@@ -114,9 +114,16 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
             itemCompleted=cursor.getInt(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_COMPLETION));
             category=cursor.getString(cursor.getColumnIndex(Contract.TABLE_TODO.COLUMN_NAME_CATEGORY));
 
+            //Sets a listener to the checkbox
+            //Calls the interface function when it is checked or unchecked
             checkBox.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
+                    if(checkBox.isChecked()){
+                        itemCompleted=1;
+                    }
+                    else
+                        itemCompleted=0;
                     listener.checkBoxUsed(description,duedate,itemCompleted,category,id);
                 }
             });
