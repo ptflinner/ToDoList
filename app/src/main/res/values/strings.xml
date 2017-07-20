@@ -16,4 +16,6 @@
         <item>Business</item>
         <item>Personal</item>
     </string-array>
+    <string name="description_title"><u>To Do</u></string>
+    <string name="due_date"><u>Finish By</u></string>
 </resources>

@@ -6,7 +6,7 @@
     android:title="Default"
     android:id="@+id/default_category"
     android:orderInCategory="1"
-    app:showAsAction="collapseActionView"
+    app:showAsAction="ifRoom"
     />
     <item
         android:title="Shopping"

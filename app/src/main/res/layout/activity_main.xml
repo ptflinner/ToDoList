@@ -7,8 +7,26 @@
     android:orientation="vertical"
     android:padding="20dp"
     android:weightSum="1"
-    tools:context="com.sargent.mark.todolist.MainActivity">
+    tools:context="com.example.patrick.todolist.MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/description_title"
+            android:textSize="26sp"
+            android:layout_marginLeft="20dp"
+            android:gravity="start"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/due_date"
+            android:textSize="26sp"
+            android:gravity="end"/>
+    </RelativeLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

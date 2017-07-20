@@ -2,6 +2,7 @@ package com.example.patrick.todolist;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -121,22 +122,28 @@ public class ToDoListAdapter extends RecyclerView.Adapter<ToDoListAdapter.ItemHo
                 public void onClick(View view) {
                     if(checkBox.isChecked()){
                         itemCompleted=1;
+                        descr.setPaintFlags(descr.getPaintFlags()| Paint.STRIKE_THRU_TEXT_FLAG);
                     }
-                    else
-                        itemCompleted=0;
+                    else {
+                        itemCompleted = 0;
+                        descr.setPaintFlags(0);
+                    }
                     listener.checkBoxUsed(description,duedate,itemCompleted,category,id);
                 }
             });
 
-            if(itemCompleted==1){
-                checkBox.setChecked(true);
-            }else{
-                checkBox.setChecked(false);
-            }
 
             descr.setText(description);
             due.setText(duedate);
             holder.itemView.setTag(id);
+
+            if(itemCompleted==1){
+                checkBox.setChecked(true);
+                descr.setPaintFlags(descr.getPaintFlags()| Paint.STRIKE_THRU_TEXT_FLAG);
+            }else{
+                checkBox.setChecked(false);
+                descr.setPaintFlags(0);
+            }
 
         }
 
